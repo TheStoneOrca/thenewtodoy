@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import EditForm from "./__components/editform";
+import { createClient } from "@/app/utils/supabase/client";
 
 export default function PostsPage() {
   const { id } = useParams();
@@ -40,8 +41,20 @@ export default function PostsPage() {
       return retrievedTodos;
     };
 
-    getTodoItems().then((res) => {
-      setTodos(res);
+    const checkIfTodoExists = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from("todos").select().eq("id", id);
+      if (data[0] == null || data == null) {
+        window.location.href = "/error";
+      } else {
+        return;
+      }
+    };
+
+    checkIfTodoExists().then(() => {
+      getTodoItems().then((res) => {
+        setTodos(res);
+      });
     });
   }, []);
 

@@ -9,31 +9,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import TodoQstnCard from "./__components/todoQstnCard";
+import { Label } from "@/components/ui/label";
 
 export default function TodosPage() {
   const [todoGroups, setTodoGroups] = useState<any>([]);
   const [isShowingQstn, setIsShowingQstn] = useState<boolean>(false);
+  const [isShowingTodoEdit, setIsShowingTodoEdit] = useState<boolean>(false);
   const supabase = createClient();
 
   useEffect(() => {
     const getTodos = async () => {
-      const myTodos: any = await supabase.from("todos").select();
-      return myTodos;
+      const { data, error }: any = await supabase.from("todos").select();
+      return data;
     };
-    const groupedTodos: number[][] = [];
-
-    function seeMaxAmmountofCards() {
-      let x = window.screen.width / 248;
-      return Math.ceil(x);
-    }
-
-    const cardAmmount = seeMaxAmmountofCards();
 
     getTodos().then((userTodos) => {
-      while (userTodos.data.length > 0) {
-        groupedTodos.push(userTodos.data.splice(0, cardAmmount));
-      }
-      setTodoGroups(groupedTodos);
+      setTodoGroups(userTodos);
     });
   }, []);
   return (
@@ -41,27 +32,21 @@ export default function TodosPage() {
       {todoGroups ? (
         <>
           <div className="flex flex-col items-center gap-12">
-            <Card className="w-48 h-48 flex self-start justify-center">
-              <Button
-                className="w-24 h-24"
+            <div className="flex-col w-full flex justify-center items-center">
+              <h1 className="text-[1.6rem]" style={{ fontSize: "1.6rem" }}>
+                <b> Your Todo Lists</b>
+              </h1>
+              <hr />
+              <div
+                className="h-8 items-center w-full border flex gap-1"
                 onClick={() => setIsShowingQstn(!isShowingQstn)}
               >
                 <Plus />
-              </Button>
-            </Card>
-
-            {isShowingQstn && (
-              <div className="justify-self-center self-center">
-                <TodoQstnCard />
+                Create New
               </div>
-            )}
-            <div className="flex-col w-full flex justify-start gap-8">
-              {todoGroups.map((group: any, idx: any) => (
-                <div key={idx} className="flex gap-6">
-                  {group.map((cardInfo: any, i: any) => (
-                    <TodoCard key={i} title={cardInfo.name} id={cardInfo.id} />
-                  ))}
-                </div>
+              {isShowingQstn && <TodoQstnCard />}
+              {todoGroups.map((cardInfo: any, i: any) => (
+                <TodoCard key={i} title={cardInfo.name} id={cardInfo.id} />
               ))}
             </div>
           </div>

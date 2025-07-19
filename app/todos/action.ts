@@ -3,10 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../utils/supabase/server";
 
-export default async function PostCreation(info: {
-  title: string;
-  userid: string;
-}) {
+export async function PostCreation(info: { title: string; userid: string }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,5 +24,27 @@ export default async function PostCreation(info: {
     console.log("success");
     const url = "/todos/" + data[0].id;
     return redirect(url);
+  }
+}
+
+export async function DeleteTodo(info: { id: number }) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from("todos").delete().eq("id", info.id);
+  if (error) {
+    console.error(error);
+    return redirect("/error");
+  }
+}
+
+export async function EditTodo(info: { id: number; name: string }) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("todos")
+    .update({ name: info.name })
+    .eq("id", info.id);
+  if (error) {
+    console.error(error);
+    return redirect("/error");
   }
 }
